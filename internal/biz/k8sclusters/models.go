@@ -36,5 +36,4 @@ type K8SClusterDetail struct {
 	// The version of the productized kubernetes distribution
 	VendorVersion string `json:"vendor_version"`
 	CloudPlatform string `json:"cloud_platform"`
-	Nodes         []Node `json:"nodes"`
 }

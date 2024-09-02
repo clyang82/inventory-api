@@ -104,21 +104,11 @@ func resourceDataFromPb(r *pb.K8SClusterDetail) *biz.K8SClusterDetail {
 
 		VendorVersion: r.VendorVersion,
 		CloudPlatform: r.CloudPlatform.String(),
-
-		Nodes: nodes,
 	}
 	return rd
 }
 
 func pbResourceDataFromModel(m *biz.K8SClusterDetail) *pb.K8SClusterDetail {
-	var nodes []*pb.K8SClusterDetailNodesInner
-	for _, n := range m.Nodes {
-		nodes = append(nodes, &pb.K8SClusterDetailNodesInner{
-			Name:   n.Name,
-			Cpu:    n.Cpu,
-			Memory: n.Memory,
-		})
-	}
 
 	// TODO: Error handling if the string lookups fail in the pb maps
 	rd := &pb.K8SClusterDetail{
@@ -130,8 +120,6 @@ func pbResourceDataFromModel(m *biz.K8SClusterDetail) *pb.K8SClusterDetail {
 
 		VendorVersion: m.VendorVersion,
 		CloudPlatform: pb.K8SClusterDetail_CloudPlatform(pb.K8SClusterDetail_CloudPlatform_value[m.CloudPlatform]),
-
-		Nodes: nodes,
 	}
 	return rd
 }
