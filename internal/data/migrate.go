@@ -6,8 +6,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/project-kessel/inventory-api/internal/biz/common"
 	"github.com/project-kessel/inventory-api/internal/biz/hosts"
+	"github.com/project-kessel/inventory-api/internal/biz/k8sclusters"
 	notifs "github.com/project-kessel/inventory-api/internal/biz/notificationsintegrations"
-	// "github.com/project-kessel/inventory-api/internal/biz/k8sclusters"
 	// "github.com/project-kessel/inventory-api/internal/biz/policies"
 	// "github.com/project-kessel/inventory-api/internal/biz/relationships"
 )
@@ -21,7 +21,7 @@ func Migrate(db *gorm.DB, logger *log.Helper) error {
 		&common.Metadata{},
 		&common.Reporter{},
 		&common.Label{},
-		// &k8sclusters.K8sCluster{},
+		&k8sclusters.K8SCluster{},
 		// &policies.Policy{},
 		// &relationships.Relationship{},
 	); err != nil {

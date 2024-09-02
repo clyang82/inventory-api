@@ -26,12 +26,7 @@ type Node struct {
 	Memory string `json:"memory"`
 	// Map of string keys and string values that can be used to organize and
 	// categorize (scope and select) resources
-	Labels []NodeLabel `json:"labels"`
-}
-
-type NodeLabel struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	Labels []common.Label `json:"labels"`
 }
 
 type K8SClusterDetail struct {
