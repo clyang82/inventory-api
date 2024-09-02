@@ -10,7 +10,6 @@ import (
 	"github.com/project-kessel/inventory-api/api/kessel/inventory/v1beta1/resources"
 	pb "github.com/project-kessel/inventory-api/api/kessel/inventory/v1beta1/resources"
 	authnapi "github.com/project-kessel/inventory-api/internal/authn/api"
-	"github.com/project-kessel/inventory-api/internal/biz/common"
 	biz "github.com/project-kessel/inventory-api/internal/biz/k8sclusters"
 	"github.com/project-kessel/inventory-api/internal/middleware"
 	conv "github.com/project-kessel/inventory-api/internal/service/common"
@@ -88,16 +87,11 @@ func createResponseFromK8sCluster(c *biz.K8SCluster) *pb.CreateK8SClusterRespons
 func resourceDataFromPb(r *pb.K8SClusterDetail) *biz.K8SClusterDetail {
 	var nodes []biz.Node
 	for _, n := range r.Nodes {
-		var labels []common.Label
-		for _, l := range n.Labels {
-			labels = append(labels, common.Label{Key: l.Key, Value: l.Value})
-		}
 
 		nodes = append(nodes, biz.Node{
 			Name:   n.Name,
 			Cpu:    n.Cpu,
 			Memory: n.Memory,
-			Labels: labels,
 		})
 	}
 
@@ -119,16 +113,10 @@ func resourceDataFromPb(r *pb.K8SClusterDetail) *biz.K8SClusterDetail {
 func pbResourceDataFromModel(m *biz.K8SClusterDetail) *pb.K8SClusterDetail {
 	var nodes []*pb.K8SClusterDetailNodesInner
 	for _, n := range m.Nodes {
-		var labels []*pb.ResourceLabel
-		for _, l := range n.Labels {
-			labels = append(labels, &pb.ResourceLabel{Key: l.Key, Value: l.Value})
-		}
-
 		nodes = append(nodes, &pb.K8SClusterDetailNodesInner{
 			Name:   n.Name,
 			Cpu:    n.Cpu,
 			Memory: n.Memory,
-			Labels: labels,
 		})
 	}
 

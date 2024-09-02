@@ -24,9 +24,6 @@ type Node struct {
 	Cpu string `json:"cpu"`
 	// Memory Capacity of the node defined as MiB, e.g. \"50Mi\"
 	Memory string `json:"memory"`
-	// Map of string keys and string values that can be used to organize and
-	// categorize (scope and select) resources
-	Labels []common.Label `json:"labels"`
 }
 
 type K8SClusterDetail struct {
