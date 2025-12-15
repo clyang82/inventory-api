@@ -30,6 +30,7 @@ spec:
       containers:
       - image: postgres:16.8
         name: postgres
+        imagePullPolicy: IfNotPresent
         envFrom:
           - secretRef:
               name: postgres-credentials

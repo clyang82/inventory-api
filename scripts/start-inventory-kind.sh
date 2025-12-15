@@ -70,6 +70,9 @@ ${DOCKER} save -o kafka-connect.tar localhost/kafka-connect:e2e-test
 $KIND load image-archive inventory-api.tar --name inventory-cluster
 $KIND load image-archive inventory-e2e-tests.tar --name inventory-cluster
 $KIND load image-archive kafka-connect.tar --name inventory-cluster
+$KIND load docker-image curlimages/curl:latest --name inventory-cluster
+$KIND load docker-image postgres:latest --name inventory-cluster
+$KIND load docker-image postgres:16.8 --name inventory-cluster
 
 # checks for the config map first, or creates it if not found
 kubectl get configmap inventory-api-psks || kubectl create configmap inventory-api-psks --from-file=config/psks.yaml
