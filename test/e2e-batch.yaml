@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
         - name: inventory-e2e-tests
-          image: localhost/inventory-e2e-tests:latest
+          image: quay.io/clyang82/inventory-e2e-tests:latest
           env:
             - name: INV_HTTP_URL
               value: "kessel-inventory-service.default.svc.cluster.local:8081"

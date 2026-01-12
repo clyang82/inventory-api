@@ -1,0 +1,214 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kessel-inventory
+  labels:
+    app: kessel-inventory
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kessel-inventory
+  template:
+    metadata:
+      labels:
+        app: kessel-inventory
+    spec:
+      initContainers:
+        - name: copy-resources
+          image: registry.access.redhat.com/ubi9
+          command:
+            - /bin/sh
+            - "-c"
+            - |
+              echo "Extracting resources from tarball..."
+              tar -xzf /mnt/resources/resources.tar.gz -C /data/schema/resources
+              echo "Extraction complete!"
+          volumeMounts:
+            - name: resources-tarball
+              mountPath: "/mnt/resources"
+            - name: resource-volume
+              mountPath: "/data/schema/resources"
+        - name: migration
+          image: quay.io/clyang82/inventory-api:e2e-test
+          command:
+            - /bin/sh
+            - "-c"
+            - |
+              echo "Waiting for PostgreSQL to be ready..."
+              sleep 20
+
+              inventory-api migrate
+          env:
+            - name: CLOWDER_ENABLED
+              value: "true"
+            - name: INVENTORY_API_CONFIG
+              value: "/inventory/inventory-api-config.yaml"
+            - name: PGDATA
+              value: /temp/data
+            - name: POSTGRES_HOST
+              value: "invdatabase"
+            - name: POSTGRES_PORT
+              value: "5433"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_DB
+              value: "spicedb"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: inventory-api-config
+                  key: db_password
+            - name: RESOURCE_DIR
+              value: "/data/schema/resources"
+          volumeMounts:
+            - name: config-volume
+              mountPath: "/inventory"
+      containers:
+        - name: api
+          image: quay.io/clyang82/inventory-api:e2e-test
+          command: ["inventory-api"]
+          args: ["serve"]
+          env:
+            - name: CLOWDER_ENABLED
+              value: "true"
+            - name: INVENTORY_API_CONFIG
+              value: "/inventory/inventory-api-config.yaml"
+            - name: PGDATA
+              value: /temp/data
+            - name: POSTGRES_HOST
+              value: "invdatabase"
+            - name: POSTGRES_PORT
+              value: "5433"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_DB
+              value: "spicedb"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: inventory-api-config
+                  key: db_password
+            - name: RESOURCE_DIR
+              value: "/data/schema/resources"
+          livenessProbe:
+            httpGet:
+              path: /api/inventory/v1/livez
+              port: 8081
+          readinessProbe:
+            httpGet:
+              path: /api/inventory/v1/readyz
+              port: 8081
+          volumeMounts:
+            - name: psks-volume
+              mountPath: "/psks.yaml"
+              subPath: psks.yaml
+            - name: config-volume
+              mountPath: "/inventory"
+            - name: resource-volume
+              mountPath: "/data/schema/resources"
+      volumes:
+        - name: config-volume
+          secret:
+            secretName: inventory-api-config
+        - name: psks-volume
+          configMap:
+            name: inventory-api-psks
+        - name: resource-volume
+          emptyDir: {}
+        - name: resources-tarball
+          configMap:
+            name: resources-tarball
+---
+# Services
+apiVersion: v1
+kind: Service
+metadata:
+  name: kessel-inventory-service
+  labels:
+    app: kessel-inventory
+spec:
+  selector:
+    app: kessel-inventory
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+    - name: grpc
+      protocol: TCP
+      port: 9081
+      targetPort: 9081
+---
+# PodDisruptionBudget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kessel-inventory-api-pdb
+  labels:
+    app: kessel-inventory
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: kessel-inventory
+---
+# Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: inventory-api-config
+type: Opaque
+stringData:
+  inventory-api-config.yaml: |
+    server:
+      http:
+        address: 0.0.0.0:8081
+      grpc:
+        address: 0.0.0.0:9081
+    authn:
+      allow-unauthenticated: true
+      #psk:
+          #pre-shared-key-file: /psks.yaml
+    authz:
+      impl: kessel
+      kessel:
+        insecure-client: true
+        url: relationships-service.default.svc.cluster.local:9000
+        enable-oidc-auth: false
+    eventing:
+      eventer: stdout
+    consumer:
+      enabled: false
+      bootstrap-servers: "my-cluster-kafka-bootstrap.default.svc.cluster.local:9092"
+      topic: outbox.event.kessel.tuples
+      retry-options:
+        consumer-max-retries: 3
+        operation-max-retries: 4
+        backoff-factor: 5
+      auth:
+        enabled: false
+    consistency:
+      read-after-write-enabled: true
+      read-after-write-allowlist: ["*"]
+    storage:
+      max-serialization-retries: 10
+      database: postgres
+      sqlite3:
+        dsn: inventory.db
+      postgres:
+        host: "invdatabase"
+        port: "5433"
+        user: "postgres"
+        password: "yPsw5e6ab4bvAGe5H"
+        dbname: "spicedb"
+    service:
+      use_v1beta2_db: true
+    resources:
+      schemaPath: "data/schema/resources"
+    log:
+      level: "debug"
+      livez: true
+      readyz: true
+  db_password: "yPsw5e6ab4bvAGe5H"
