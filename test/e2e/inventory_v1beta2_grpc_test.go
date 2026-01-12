@@ -239,7 +239,7 @@ func TestInventoryAPIHTTP_v1beta2_acm_cluster_with_user_permissions(t *testing.T
 	// Test configuration
 	workspaceId := "acm-test-workspace"
 	clusterId := "test-cluster-abc-123"
-	reporterType := "ACM"
+	reporterType := "acm"  // Must be lowercase for SpiceDB
 	reporterInstanceId := "test-acm-hub"
 	user1Principal := "user1"
 

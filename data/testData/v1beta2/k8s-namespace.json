@@ -1,0 +1,18 @@
+{
+    "type": "k8s_namespace",
+    "reporterType": "acm",
+    "reporterInstanceId": "14c6b63e-49b2-4cc2-99de-5d914b657548",
+    "representations": {
+      "metadata": {
+        "localResourceId": "ae5c7a82-cb3b-4591-9b10-3ae1506d4f3d",
+        "reporterVersion": "0.2.0"
+      },
+      "common": {
+        "workspace_id": "aee8f698-9d43-49a1-b458-680a7c9dc046"
+      },
+      "reporter": {
+        "name": "default"
+      }
+    }
+}
+
