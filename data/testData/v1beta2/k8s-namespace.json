@@ -5,13 +5,16 @@
     "representations": {
       "metadata": {
         "localResourceId": "ae5c7a82-cb3b-4591-9b10-3ae1506d4f3d",
+        "apiHref": "https://apiHref.com/",
+        "consoleHref": "https://www.console.com/",
         "reporterVersion": "0.2.0"
       },
       "common": {
         "workspace_id": "aee8f698-9d43-49a1-b458-680a7c9dc046"
       },
       "reporter": {
-        "name": "default"
+        "name": "default",
+        "cluster_id": "9414df93-aefe-4153-ba8a-8765373d39b9"
       }
     }
 }
